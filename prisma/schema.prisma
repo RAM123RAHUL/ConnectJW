@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model TargetWebsite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  baseUrl   String
+  notes     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  crawlJobs CrawlJob[]
+  events    Event[]
+
+  @@map("target_websites")
+}
+
+model EventStructure {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  version   Int     @default(1)
+  isActive  Boolean @default(true)
+  structure String  // Store JSON as string
+  createdAt DateTime @default(now())
+
+  @@map("event_structure")
+}
+
+model CrawlJob {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  websiteId   String    @db.ObjectId
+  url         String
+  status      String    @default("pending") // pending, processing, completed, failed
+  rawHtml     String?
+  error       String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  website TargetWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  events  Event[]
+
+  @@map("crawl_jobs")
+}
+
+model Event {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  crawlJobId String @db.ObjectId
+  websiteId String @db.ObjectId
+  eventData String // Store JSON as string
+  overallConfidence Float
+  fieldConfidences String // Store JSON as string
+  aiNotes String
+  sourceUrl String
+  createdAt DateTime @default(now())
+  
+  // NEW FIELDS FOR REVIEW & PUBLISHING
+  reviewStatus String @default("pending") // pending, approved, rejected
+  reviewedBy String? // Reviewer user ID
+  reviewNotes String? // Notes from reviewer
+  reviewedAt DateTime?
+  publishedAt DateTime? // When published
+  
+  crawlJob CrawlJob @relation(fields: [crawlJobId], references: [id], onDelete: Cascade)
+  website TargetWebsite @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  @@map("events")
+}
