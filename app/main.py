@@ -56,7 +56,7 @@ app.include_router(reviews.router)
 
 @app.get("/")
 async def root():
-    return {"status": "ok", "message": "AI Event Scraper API", "docs": "/docs"}
+    return {"status": "ok", "message": "AI Event Scraper API Running ", "docs": "/docs"}
 
 @app.get("/health")
 async def health():
