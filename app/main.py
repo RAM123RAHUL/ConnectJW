@@ -6,10 +6,12 @@ from contextlib import asynccontextmanager
 from app.database import connect_db, disconnect_db
 from app.api import websites, structure, crawl, events, reviews
 import logging
+ 
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # Force WindowsSelectorEventLoopPolicy for Playwright compatibility
 if sys.platform.startswith("win"):
@@ -26,6 +28,7 @@ if sys.platform.startswith("win"):
 
 # Patch for nested asyncio loops (important for FastAPI + Playwright)
 nest_asyncio.apply()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
